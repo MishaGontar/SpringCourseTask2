@@ -14,5 +14,6 @@ public interface CarService {
     List<Car> findAllByBrandAndModelAndSpeedMax(String brand, String model, int speedMax);
 
     void removeById(long id);
+
     void removeAllByBrand(String brand);
 }
