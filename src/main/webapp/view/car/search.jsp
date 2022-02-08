@@ -11,6 +11,6 @@
         <li>${value}</li>
     </c:forEach>
 </ul>
-<button onclick="window.location = '/car/all'">Back</button>
+<button onclick="window.location = '/car/carsAction'">Back</button>
 </body>
 </html>

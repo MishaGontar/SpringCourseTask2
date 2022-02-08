@@ -4,20 +4,27 @@
        xmlns:tx="http://www.springframework.org/schema/tx"
        xmlns="http://www.springframework.org/schema/beans"
        xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:cache="http://www.springframework.org/schema/cache"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:security="http://www.springframework.org/schema/security"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
-    <context:component-scan base-package="com.hellospring.*" />
-    <tx:annotation-driven transaction-manager="txManager" />
-    <jpa:repositories base-package="com.hellospring.persistence.dao.repositories" entity-manager-factory-ref="entityManagerFactory" transaction-manager-ref="txManager" />
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
+       http://www.springframework.org/schema/security
+       https://www.springframework.org/schema/security/spring-security.xsd">
+
+    <context:component-scan base-package="com.hellospring.*"/>
+    <tx:annotation-driven transaction-manager="txManager"/>
+    <jpa:repositories base-package="com.hellospring.persistence.dao.repositories"
+                      entity-manager-factory-ref="entityManagerFactory" transaction-manager-ref="txManager"/>
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
-        <property name="persistenceUnitName" value="item" />
+        <property name="persistenceUnitName" value="item"/>
     </bean>
     <bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
-        <property name="entityManagerFactory" ref="entityManagerFactory" />
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
     </bean>
 
     <bean id="logger" class="com.hellospring.aspects.SuperLogger"/>
@@ -26,17 +33,37 @@
         <property name="authorized" value="false"/>
     </bean>
 
-    <aop:config>
-       <aop:aspect ref="security" id="check">
-          <aop:before method="checkAuth" pointcut="execution(* com.hellospring.controllers.CarController.*(..))"/>
-       </aop:aspect>
+<!--    <aop:config>-->
+<!--        <aop:aspect ref="security" id="check">-->
+<!--            <aop:before method="checkAuth" pointcut="execution(* com.hellospring.controllers.CarController.*(..))"/>-->
+<!--        </aop:aspect>-->
 
-        <aop:aspect ref="logger" id="log">
-            <aop:before method="beforeMethod" pointcut="execution(* com.hellospring.controllers.CarController.*(..))"/>
-            <aop:after-returning method="afterReturn" pointcut="execution(* com.hellospring.persistence.dao.services.interfaces.CarService.*(..)) and args(result) "/>
-        <aop:after-throwing method="afterThrowing" throwing="exception" pointcut="within(@org.springframework.web.bind.annotation.RequestMapping *)"/>
-        </aop:aspect>
+<!--        <aop:aspect ref="logger" id="log">-->
+<!--            <aop:before method="beforeMethod" pointcut="execution(* com.hellospring.controllers.CarController.*(..))"/>-->
+<!--            <aop:after-returning method="afterReturn"-->
+<!--                                 pointcut="execution(* com.hellospring.persistence.dao.services.interfaces.CarService.*(..)) and args(result) "/>-->
+<!--            <aop:after-throwing method="afterThrowing" throwing="exception"-->
+<!--                                pointcut="within(@org.springframework.web.bind.annotation.RequestMapping *)"/>-->
+<!--        </aop:aspect>-->
+<!--    </aop:config>-->
 
+<security:global-method-security pre-post-annotations="enabled"/>
+<security:http auto-config="true" use-expressions="true">
+    <security:csrf disabled="true"/>
+    <security:intercept-url pattern="/car/**" access="hasAnyAuthority('ROLE_SUPER','ROLE_ADMIN')"/>
+    <security:intercept-url pattern="/**" access="permitAll()"/>
+    <security:form-login default-target-url="/" always-use-default-target="false" authentication-failure-url="/login?error=true"/>
+    <security:logout logout-success-url="/"/>
+    <security:remember-me/>
+</security:http>
 
-    </aop:config>
+<security:authentication-manager>
+    <security:authentication-provider>
+        <security:user-service>
+            <security:user name="super1" authorities="ROLE_SUPER" password="{noop}1"/>
+            <security:user name="nosuper" authorities="ROLE_SUPER" password="{noop}2"/>
+            <security:user name="admin" authorities="ROLE_ADMIN" password="{noop}admin"/>
+        </security:user-service>
+    </security:authentication-provider>
+</security:authentication-manager>
 </beans>

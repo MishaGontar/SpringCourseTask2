@@ -10,11 +10,16 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletRequest;
 
 @Controller
-@RequestMapping( "/car")
+@RequestMapping("/car")
 public class CarController {
 
     @Autowired
     private CarService carService;
+
+    @GetMapping(value = "/carsAction")
+    public String action_car() {
+        return "view/car/cars";
+    }
 
     @GetMapping(value = "/all")
     public ModelAndView getAllCar(ModelAndView modelAndView) throws InterruptedException {
@@ -32,7 +37,7 @@ public class CarController {
         car.setModel(request.getParameter("model"));
         car.setSpeedMax(Integer.parseInt(request.getParameter("speedMax")));
         carService.addCar(car);
-        return "redirect: all";
+        return "redirect: carsAction";
     }
 
     @GetMapping(value = "/findByBrand")
@@ -47,7 +52,7 @@ public class CarController {
             @RequestParam("brand") String brand,
             @RequestParam("model") String modelCar,
             @RequestParam("speedMax") int speed, ModelAndView model) {
-        model.addObject("cars", carService.findAllByBrandAndModelAndSpeedMax(brand, modelCar,speed));
+        model.addObject("cars", carService.findAllByBrandAndModelAndSpeedMax(brand, modelCar, speed));
         model.setViewName("view/car/search");
         return model;
     }
@@ -55,12 +60,12 @@ public class CarController {
     @GetMapping(value = "/removeById")
     public String removeById(@RequestParam("id") long id) throws InterruptedException {
         carService.removeById(id);
-        return "redirect:all";
+        return "redirect:carsAction";
     }
 
     @GetMapping(value = "/removeAllByBrand")
-    public String removeAllByBrand(@RequestParam("brand") String brand)throws InterruptedException {
+    public String removeAllByBrand(@RequestParam("brand") String brand) throws InterruptedException {
         carService.removeAllByBrand(brand);
-        return "redirect:all";
+        return "redirect:carsAction";
     }
 }

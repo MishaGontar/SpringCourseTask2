@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,10 +11,12 @@
     }
 </style>
 <body>
+<sec:authorize access="hasAuthority('ROLE_ADMIN')">
 <h1>All Cars</h1>
 ${cars}
+<button onclick="window.location = '/car/all'">Show all cars</button>
+</sec:authorize>
 <h1>Actions</h1>
-
 <form method="post" action="/car/add">
     <h3>Add new car</h3>
     <input name="brand" type="text" placeholder="Brand ...">
